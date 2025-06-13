@@ -29,7 +29,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS for better styling (UPDATED FOR DARK THEME VISIBILITY)
 st.markdown("""
 <style>
     .main-header {
@@ -59,31 +59,38 @@ st.markdown("""
         font-weight: bold;
         margin: 0;
     }
+    /* --- UPDATED TAB STYLES FOR DARK THEME --- */
     .stTabs [data-baseweb="tab-list"] button {
-        background-color: #f0f2f6;
+        background-color: #333;
+        color: white;
         border-radius: 8px 8px 0 0;
         margin: 0 5px;
         font-size: 1.1rem;
         font-weight: bold;
     }
     .stTabs [data-baseweb="tab-list"] button:hover {
-        background-color: #e0e2e6;
+        background-color: #444;
+        color: white;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #1f77b4 !important;
+        background-color: black !important; /* Black for selected tab */
         color: white !important;
+        border: 1px solid #ff7f0e;
     }
+    /* --- UPDATED BUTTON STYLES FOR DARK THEME --- */
     .stButton>button {
-        background-color: #1f77b4;
+        background-color: black; /* Black background for buttons */
         color: white;
+        border: 1px solid #ff7f0e; /* Orange border for visibility */
         border-radius: 5px;
         padding: 10px 20px;
         font-size: 1rem;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s, color 0.3s;
     }
     .stButton>button:hover {
-        background-color: #ff7f0e;
-        color: white;
+        background-color: #ff7f0e; /* Orange on hover */
+        color: black; /* Black text on hover for contrast */
+        border: 1px solid black;
     }
     .css-1d391kg {
         background-color: #ffffff;
@@ -468,18 +475,6 @@ class StockAnalyzer:
 stock_analyzer = StockAnalyzer()
 all_stock_symbols = stock_analyzer.get_all_stock_symbols()
 
-# Create a mapping from symbol to a more readable name for selectbox if available, else use symbol
-# For a large list, fetching all names initially can be slow.
-# For simplicity, we'll just use symbols directly for the selectbox and fetch name on demand.
-# Or, create a small cache of popular names if needed.
-# For now, let's use the symbol as both the key and the display value for the selectbox,
-# or create a mapping of symbol to shortName for common ones.
-# For demo purposes, we will use symbols directly, as fetching info for 200+ stocks on startup
-# is not ideal for Streamlit performance.
-# You can uncomment and modify this if you want to pre-fetch names for a smaller, curated list.
-# stock_name_symbol_map = {get_current_stock_info(s).get('shortName', s): s for s in all_stock_symbols if get_current_stock_info(s)}
-# For simplicity, we'll just use symbols as options and fetch names dynamically when selected.
-
 class PortfolioBuilder:
     """Manages asset allocation, investment projections, and stock suggestions."""
     def __init__(self, stock_analyzer_instance):
@@ -569,15 +564,21 @@ class Chatbot:
             if "chat_history" not in st.session_state:
                 st.session_state.chat_history = [] 
 
+    # --- CORRECTED get_response METHOD ---
     def get_response(self, query):
+        """
+        Gets a response from the chatbot.
+        This method is now safe to call from within st.spinner because it no longer calls st.error itself.
+        Instead, it returns an error message as a string, which can be safely displayed.
+        """
         if self.conversation:
             try:
                 # Predict the response based on the query and current conversation history
                 response = self.conversation.predict(input=query)
                 return response
             except Exception as e:
-                st.error(f"Error communicating with OpenAI: {e}")
-                return "I'm sorry, I encountered an error while processing your request. Please try again."
+                # Return the error message as a string instead of calling st.error
+                return f"I'm sorry, I encountered an error while processing your request: {e}. Please try again."
         else:
             return "Chatbot is not initialized. Please ensure the OpenAI API key is set correctly."
 
@@ -588,10 +589,6 @@ class Chatbot:
 st.sidebar.header("Select a Stock")
 
 # Use the combined list from StockAnalyzer for the primary selectbox
-# For display, we want readable names. We can fetch the shortName dynamically or use symbol.
-# For this many stocks, dynamically fetching names for *all* in the selectbox is not feasible.
-# So, for the selectbox, we will stick to showing the symbols.
-# A small mapping for popular stocks can be done manually if needed.
 selected_stock_symbol_from_list = st.sidebar.selectbox(
     "Choose a stock from our curated list:", 
     all_stock_symbols,
@@ -625,6 +622,7 @@ for message in st.session_state.chat_history:
 # Accept user input
 user_query_sidebar = st.sidebar.chat_input("Type your question here...", key="chat_input_sidebar")
 
+# --- CORRECTED CHATBOT INTERACTION LOGIC ---
 if user_query_sidebar:
     # Add user message to chat history
     st.session_state.chat_history.append({"role": "user", "content": user_query_sidebar})
@@ -632,9 +630,11 @@ if user_query_sidebar:
     with st.sidebar.chat_message("user"):
         st.sidebar.markdown(user_query_sidebar)
 
-    # Get response from the actual OpenAI chatbot
+    # Display assistant response in chat message container
     with st.sidebar.chat_message("assistant"):
+        # The spinner will be displayed inside the assistant's chat bubble while waiting
         with st.sidebar.spinner("Thinking..."):
+            # The get_response call is now safe
             response_sidebar = st.session_state.chatbot_instance.get_response(user_query_sidebar)
             st.sidebar.markdown(response_sidebar)
             # Add assistant response to chat history
@@ -648,7 +648,6 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📊 Dashboard", "🔍 Stock Screener", "💰 AI Portfolio Builder",
     "🗓️ Earnings Calendar", "⚖️ Stock Comparison", "📝 AI Reports"
 ])
-
 
 with tab1: # Dashboard Tab
     # Dynamically fetch the full name for display if available, else use symbol
@@ -859,44 +858,39 @@ with tab2: # Stock Screener Tab
         st.warning("Could not load Nifty 50 sample data for the screener. Please try again later.")
 
 
-with tab3:
+with tab3: # AI Portfolio Builder Tab
     st.header("💰 AI Portfolio Builder")
     st.markdown("---")
 
-    # Initialize the portfolio builder
+    # Pass the stock_analyzer instance to PortfolioBuilder
     portfolio_builder_instance = PortfolioBuilder(stock_analyzer)
 
-    # --- 1. Risk-Based Asset Allocation ---
     st.subheader("1. Risk-Based Asset Allocation")
     risk_profile = st.selectbox(
         "Select your risk profile:",
         ["Conservative", "Moderate", "Aggressive"]
     )
-
     allocation = portfolio_builder_instance.get_asset_allocation(risk_profile)
     if allocation:
-        st.write(f"Based on a **{risk_profile}** risk profile, here's a suggested equity allocation:")
-        allocation_df = pd.DataFrame(list(allocation.items()), columns=["Asset Class", "Allocation (%)"])
-        allocation_df['Allocation (%)'] *= 100
+        st.write(f"Based on a **{risk_profile}** risk profile, here's a suggested asset allocation:")
+        allocation_df = pd.DataFrame(allocation.items(), columns=["Asset Class", "Allocation (%)"])
+        allocation_df['Allocation (%)'] = allocation_df['Allocation (%)'] * 100
         st.dataframe(allocation_df.set_index("Asset Class"), use_container_width=True)
 
-        fig_pie = px.pie(
-            allocation_df, values='Allocation (%)', names='Asset Class',
-            title='Suggested Equity Allocation', hole=0.4
-        )
+        fig_pie = px.pie(allocation_df, values='Allocation (%)', names='Asset Class',
+                         title='Suggested Portfolio Allocation',
+                         hole=0.4)
         fig_pie.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig_pie, use_container_width=True)
     else:
-        st.warning("Could not retrieve equity allocation for the selected risk profile.")
+        st.warning("Could not retrieve asset allocation for the selected risk profile.")
 
-    # --- 2. Investment Projection ---
     st.subheader("2. Investment Projection")
     col_p1, col_p2 = st.columns(2)
     with col_p1:
         initial_investment = st.number_input("One-time Investment (INR)", min_value=0, value=100000, step=10000)
     with col_p2:
         monthly_sip = st.number_input("Monthly SIP (INR)", min_value=0, value=5000, step=1000)
-
     duration_years = st.slider("Investment Duration (Years)", min_value=1, max_value=30, value=10)
 
     if st.button("Project Investment"):
@@ -909,28 +903,26 @@ with tab3:
         st.markdown(f"""
             <details>
             <summary>Assumptions for Projection</summary>
-            _This projection uses **simulated average annual returns** based on your selected profile:_  
-            • Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap'] * 100:.1f}%  
-            • Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap'] * 100:.1f}%  
-            • Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap'] * 100:.1f}%  
-
-            _SIP is calculated using future value of an annuity formula._  
-            _Projections exclude market volatility, inflation, taxes, or investment fees._  
-            _Consult a certified financial advisor before investing._
+            _This projection uses **simulated average annual returns** based on your risk profile 
+            (e.g., Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap']*100:.1f}%, 
+            Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap']*100:.1f}%, 
+            Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%, 
+            Debt: {portfolio_builder_instance.average_annual_returns['Debt']*100:.1f}%,
+            Gold: {portfolio_builder_instance.average_annual_returns['Gold']*100:.1f}%)._
+            _It's a simplified calculation and does not account for market volatility, inflation, taxes, fees, or actual historical performance of specific investments.
+            For **SIP**, the calculation uses the future value of an annuity formula based on your monthly investment.
+            **Past performance is not indicative of future results. Always consult a qualified financial advisor before making investment decisions.**_
             </details>
-        """, unsafe_allow_html=True)
+        """)
 
-    # --- 3. Example Stock Suggestions ---
     st.subheader("3. Example Stock Suggestions")
-    st.write("Sample equity stock suggestions based on your selected risk profile (illustrative, not financial advice).")
-
+    st.write("Here are some sample stock suggestions based on your selected risk profile and asset allocation. These are for illustrative purposes only and require thorough research before investing.")
     suggestions = portfolio_builder_instance.get_stock_suggestions(risk_profile)
     for asset, stock_list in suggestions.items():
-        if asset in ["Large Cap", "Mid Cap", "Small Cap"]:
-            if stock_list:
-                st.markdown(f"**{asset} Stocks:** {', '.join(stock_list)}")
-            else:
-                st.markdown(f"**{asset} Stocks:** No suggestions currently.")
+        if stock_list:
+            st.markdown(f"**{asset} Stocks:** {', '.join(stock_list)}")
+        else:
+            st.markdown(f"**{asset} Stocks:** No specific suggestions available for this category based on current setup.")
 
 
 with tab4: # Earnings Calendar Tab (previously tab5)
