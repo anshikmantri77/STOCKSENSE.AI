@@ -638,7 +638,7 @@ with tab1: # Dashboard Tab
     elif temp_info and temp_info.get('longName'):
         display_stock_name = temp_info['longName']
 
-    st.header(f"📈 {display_stock_name} ({selected_stock_symbol}) Dashboard")
+    st.header(f"📈 {display_stock_name} ({selected_stock_symbol})")
     st.markdown("---")
 
     stock_data = get_stock_data(selected_stock_symbol)
