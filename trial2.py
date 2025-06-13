@@ -848,7 +848,7 @@ with tab2: # Stock Screener Tab
             st.info("No stocks match your criteria. Try adjusting the filters.")
     else:
         st.warning("Could not load Nifty 50 sample data for the screener. Please try again later.")
-with tab3: # AI Portfolio Builder Tab
+with tab3:  # AI Portfolio Builder Tab
     st.header("💰 AI Portfolio Builder")
     st.markdown("---")
 
@@ -861,6 +861,11 @@ with tab3: # AI Portfolio Builder Tab
         ["Conservative", "Moderate", "Aggressive"]
     )
     allocation = portfolio_builder_instance.get_asset_allocation(risk_profile)
+
+    # Filter only Large, Mid, and Small Cap allocations
+    allowed_classes = {"Large Cap", "Mid Cap", "Small Cap"}
+    allocation = {k: v for k, v in allocation.items() if k in allowed_classes}
+
     if allocation:
         st.write(f"Based on a **{risk_profile}** risk profile, here's a suggested asset allocation:")
         allocation_df = pd.DataFrame(allocation.items(), columns=["Asset Class", "Allocation (%)"])
@@ -896,9 +901,8 @@ with tab3: # AI Portfolio Builder Tab
             _This projection uses **simulated average annual returns** based on your risk profile
             (e.g., Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap']*100:.1f}%,
             Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap']*100:.1f}%,
-            Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%,
-            Debt: {portfolio_builder_instance.average_annual_returns['Debt']*100:.1f}%,
-            Gold: {portfolio_builder_instance.average_annual_returns['Gold']*100:.1f}%)._
+            Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%)._
+
             _It's a simplified calculation and does not account for market volatility, inflation, taxes, fees, or actual historical performance of specific investments.
             For **SIP**, the calculation uses the future value of an annuity formula based on your monthly investment.
             **Past performance is not indicative of future results. Always consult a qualified financial advisor before making investment decisions.**_
@@ -908,11 +912,13 @@ with tab3: # AI Portfolio Builder Tab
     st.subheader("3. Example Stock Suggestions")
     st.write("Here are some sample stock suggestions based on your selected risk profile and asset allocation. These are for illustrative purposes only and require thorough research before investing.")
     suggestions = portfolio_builder_instance.get_stock_suggestions(risk_profile)
+
     for asset, stock_list in suggestions.items():
-        if stock_list:
-            st.markdown(f"**{asset} Stocks:** {', '.join(stock_list)}")
-        else:
-            st.markdown(f"**{asset} Stocks:** No specific suggestions available for this category based on current setup.")
+        if asset in allowed_classes:
+            if stock_list:
+                st.markdown(f"**{asset} Stocks:** {', '.join(stock_list)}")
+            else:
+                st.markdown(f"**{asset} Stocks:** No specific suggestions available for this category.")
 
 
 with tab4: # Earnings Calendar Tab
