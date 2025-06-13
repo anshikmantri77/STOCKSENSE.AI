@@ -457,14 +457,14 @@ class PortfolioBuilder:
         self.stock_analyzer = stock_analyzer_instance
         # Average annual returns for different asset classes (hypothetical, for projection)
         self.average_annual_returns = {
-            "Large Cap": 0.12, "Mid Cap": 0.15, "Small Cap": 0.18,
-            "Debt": 0.07, "Gold": 0.08
+            "Large Cap": 0.12, "Mid Cap": 0.15, "Small Cap": 0.18
+            
         }
         # Risk-based asset allocation percentages
         self.risk_profiles = {
-            "Conservative": {"Large Cap": 0.40, "Mid Cap": 0.10, "Small Cap": 0.00, "Debt": 0.40, "Gold": 0.10},
-            "Moderate": {"Large Cap": 0.35, "Mid Cap": 0.20, "Small Cap": 0.10, "Debt": 0.25, "Gold": 0.10},
-            "Aggressive": {"Large Cap": 0.25, "Mid Cap": 0.25, "Small Cap": 0.20, "Debt": 0.20, "Gold": 0.10}
+            "Conservative": {"Large Cap": 0.50, "Mid Cap": 0.30, "Small Cap": 0.20},
+            "Moderate": {"Large Cap": 0.30, "Mid Cap": 0.50, "Small Cap": 0.20},
+            "Aggressive": {"Large Cap": 0.20, "Mid Cap": 0.40, "Small Cap": 0.40}
         }
 
     def get_asset_allocation(self, risk_profile):
@@ -499,9 +499,7 @@ class PortfolioBuilder:
                     available_stocks = self.stock_analyzer.mid_cap_stocks
                 elif asset == "Small Cap":
                     available_stocks = self.stock_analyzer.small_cap_stocks
-                elif asset == "Debt" or asset == "Gold":
-                    # Use placeholder symbols for Debt/Gold as StockAnalyzer doesn't manage them
-                    available_stocks = ["GOVTSEC.NS (Debt Fund)", "GOLDBEES.NS (Gold ETF)"]
+        
                 else:
                     available_stocks = []
 
@@ -909,7 +907,7 @@ with tab3:  # AI Portfolio Builder Tab
             </details>
         """)
 
-    st.subheader("3. Example Stock Suggestions")
+    st.subheader("3.Stock Suggestions")
     st.write("Here are some sample stock suggestions based on your selected risk profile and asset allocation. These are for illustrative purposes only and require thorough research before investing.")
     suggestions = portfolio_builder_instance.get_stock_suggestions(risk_profile)
 
