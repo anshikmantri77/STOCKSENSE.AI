@@ -10,9 +10,10 @@ from textblob import TextBlob
 import warnings
 import random
 import pytz
+import os # Import os for environment variables
 
-# --- NEW IMPORTS FOR GEMINI CHATBOT ---
-from langchain_google_genai import ChatGoogleGenerativeAI # Updated import for Gemini LLM
+# --- NEW IMPORTS FOR HUGGING FACE CHATBOT ---
+from langchain_community.llms import HuggingFaceHub # Import for Hugging Face LLM
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 # --- END NEW IMPORTS ---
@@ -534,42 +535,51 @@ class PortfolioBuilder:
                     suggestions[asset] = random.sample(available_stocks, num_suggestions)
         return suggestions
 
-# --- UPDATED CHATBOT CLASS USING GEMINI AND LANGCHAIN ---
+# --- UPDATED CHATBOT CLASS USING HUGGING FACE AND LANGCHAIN ---
 class Chatbot:
-    """A chatbot integrated with Google's Gemini models via LangChain for conversational AI."""
+    """A chatbot integrated with Hugging Face models via LangChain for conversational AI."""
     def __init__(self):
-        # --- LINE TO PUT YOUR GEMINI API KEY ---
-        # It's highly recommended to use Streamlit Secrets for production deployment:
-        # Create a file named .streamlit/secrets.toml in your project root,
-        # and add: GOOGLE_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
-        # Then access it via st.secrets["GOOGLE_API_KEY"]
-        gemini_api_key = st.secrets.get("GOOGLE_API_KEY") # Use .get() to avoid KeyError if not found
+        # Retrieve Hugging Face API token from environment variables
+        # Set this environment variable before running the app:
+        # export HUGGINGFACEHUB_API_TOKEN="hf_YOUR_ACTUAL_HUGGING_FACE_TOKEN"
+        hf_api_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
-        if not gemini_api_key:
-            st.error("Google Gemini API key not found. Please set it in .streamlit/secrets.toml or as an environment variable.")
+        if not hf_api_token:
+            st.error("HUGGINGFACEHUB_API_TOKEN environment variable not found. Please set it to use the AI chatbot.")
             self.conversation = None
             # Optionally st.stop() here if chatbot functionality is critical
         else:
-            # Initialize Gemini LLM
-            # Using "models/gemini-pro" which is the more explicit and robust way to call the model
-            # Temperature controls creativity (0.0 for factual, higher for more creative)
-            llm = ChatGoogleGenerativeAI(google_api_key=gemini_api_key, temperature=0.7, model="models/gemini-pro")
+            # Initialize HuggingFaceHub LLM
+            # Choose a suitable model from Hugging Face Hub for text generation.
+            # google/flan-t5-xxl is a large model and might be slow or rate-limited.
+            # You might want to pick a smaller, faster model if performance is an issue,
+            # or a more powerful one if you have access to it (e.g., from an Inference API endpoint).
+            # Check Hugging Face Hub for available models (e.g., text-generation, summarization tags).
+            # Example: "google/flan-t5-xxl", "distilbert-base-uncased" (for embeddings, not chat),
+            # "tiiuae/falcon-7b-instruct" (if accessible), "gpt2" (smaller, faster)
+            try:
+                llm = HuggingFaceHub(
+                    repo_id="google/flan-t5-xxl", # Example model, replace if needed
+                    model_kwargs={"temperature": 0.7, "max_length": 500},
+                    huggingfacehub_api_token=hf_api_token
+                )
+                # Initialize ConversationChain with memory to maintain chat history
+                self.conversation = ConversationChain(
+                    llm=llm,
+                    memory=ConversationBufferMemory()
+                )
+                # Initialize chat history in session state if not already present
+                if "chat_history" not in st.session_state:
+                    st.session_state.chat_history = []
+            except Exception as e:
+                st.error(f"Error initializing Hugging Face LLM. Please check your token and model ID: {e}")
+                self.conversation = None
 
-            # Initialize ConversationChain with memory to maintain chat history
-            self.conversation = ConversationChain(
-                llm=llm,
-                memory=ConversationBufferMemory()
-            )
-            # Initialize chat history in session state if not already present
-            if "chat_history" not in st.session_state:
-                st.session_state.chat_history = []
 
-    # --- CORRECTED get_response METHOD ---
     def get_response(self, query):
         """
         Gets a response from the chatbot.
-        This method is now safe to call from within st.spinner because it no longer calls st.error itself.
-        Instead, it returns an error message as a string, which can be safely displayed.
+        This method returns an error message as a string if there's an issue.
         """
         if self.conversation:
             try:
@@ -580,7 +590,7 @@ class Chatbot:
                 # Return the error message as a string instead of calling st.error
                 return f"I'm sorry, I encountered an error while processing your request: {e}. Please try again."
         else:
-            return "Chatbot is not initialized. Please ensure the Google Gemini API key is set correctly."
+            return "Chatbot is not initialized. Please ensure the Hugging Face API token and model are set correctly."
 
 # --- END UPDATED CHATBOT CLASS ---
 
@@ -1141,7 +1151,7 @@ with tab6: # AI-Generated Stock Reports Tab
             st.markdown(report_text)
         else:
             st.error("Could not generate report due to missing data for the selected stock.")
-        st.markdown("*(Note: A full AI-generated report would require integration with a powerful Large Language Model (LLM) like Google's Gemini or similar, which would analyze real-time data and generate comprehensive insights.)*")
+        st.markdown("*(Note: A full AI-generated report would require integration with a powerful Large Language Model (LLM) from Hugging Face Hub or similar, which would analyze real-time data and generate comprehensive insights.)*")
 
 
 # Sidebar Footer with Disclaimer and Creator Info
