@@ -5,6 +5,7 @@ yfinance>=0.2.40
 altair>=5.3.0
 plotly>=5.20.0
 textblob>=0.18.0.0
-langchain
-huggingface_hub
+langchain # Keep this for core LangChain functionalities
+langchain-community # This is crucial for HuggingFaceHub and other community integrations
+huggingface_hub # The underlying library for Hugging Face interactions
 pytz
