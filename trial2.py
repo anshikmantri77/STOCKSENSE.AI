@@ -858,7 +858,7 @@ with tab2: # Stock Screener Tab
         st.warning("Could not load Nifty 50 sample data for the screener. Please try again later.")
 
 
-with tab3: # AI Portfolio Builder Tab
+with tab3:
     st.header("💰 AI Portfolio Builder")
     st.markdown("---")
 
@@ -870,20 +870,24 @@ with tab3: # AI Portfolio Builder Tab
         "Select your risk profile:",
         ["Conservative", "Moderate", "Aggressive"]
     )
+
+    # Fetch and display only Large, Mid, Small Cap allocations
     allocation = portfolio_builder_instance.get_asset_allocation(risk_profile)
-    if allocation:
-        st.write(f"Based on a **{risk_profile}** risk profile, here's a suggested asset allocation:")
-        allocation_df = pd.DataFrame(allocation.items(), columns=["Asset Class", "Allocation (%)"])
+    filtered_allocation = {k: v for k, v in allocation.items() if k in ["Large Cap", "Mid Cap", "Small Cap"]}
+
+    if filtered_allocation:
+        st.write(f"Based on a **{risk_profile}** risk profile, here's a suggested equity allocation:")
+        allocation_df = pd.DataFrame(filtered_allocation.items(), columns=["Asset Class", "Allocation (%)"])
         allocation_df['Allocation (%)'] = allocation_df['Allocation (%)'] * 100
         st.dataframe(allocation_df.set_index("Asset Class"), use_container_width=True)
 
         fig_pie = px.pie(allocation_df, values='Allocation (%)', names='Asset Class',
-                         title='Suggested Portfolio Allocation',
+                         title='Suggested Equity Allocation',
                          hole=0.4)
         fig_pie.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig_pie, use_container_width=True)
     else:
-        st.warning("Could not retrieve asset allocation for the selected risk profile.")
+        st.warning("Could not retrieve equity allocation for the selected risk profile.")
 
     st.subheader("2. Investment Projection")
     col_p1, col_p2 = st.columns(2)
@@ -903,26 +907,26 @@ with tab3: # AI Portfolio Builder Tab
         st.markdown(f"""
             <details>
             <summary>Assumptions for Projection</summary>
-            _This projection uses **simulated average annual returns** based on your risk profile 
-            (e.g., Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap']*100:.1f}%, 
-            Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap']*100:.1f}%, 
-            Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%, 
-            Debt: {portfolio_builder_instance.average_annual_returns['Debt']*100:.1f}%,
-            Gold: {portfolio_builder_instance.average_annual_returns['Gold']*100:.1f}%)._
-            _It's a simplified calculation and does not account for market volatility, inflation, taxes, fees, or actual historical performance of specific investments.
-            For **SIP**, the calculation uses the future value of an annuity formula based on your monthly investment.
-            **Past performance is not indicative of future results. Always consult a qualified financial advisor before making investment decisions.**_
+            _This projection uses **simulated average annual returns** based on your risk profile:_
+            - Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap']*100:.1f}%  
+            - Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap']*100:.1f}%  
+            - Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%  
+            
+            _SIP projections are calculated using the future value of an annuity formula._
+            _Results do not consider market volatility, inflation, taxes, or fees._
+            _Always consult a certified financial advisor before investing._
             </details>
-        """)
+        """, unsafe_allow_html=True)
 
     st.subheader("3. Example Stock Suggestions")
-    st.write("Here are some sample stock suggestions based on your selected risk profile and asset allocation. These are for illustrative purposes only and require thorough research before investing.")
+    st.write("Here are sample equity stock suggestions based on your selected risk profile. These are for illustrative purposes only and not financial advice.")
     suggestions = portfolio_builder_instance.get_stock_suggestions(risk_profile)
     for asset, stock_list in suggestions.items():
-        if stock_list:
-            st.markdown(f"**{asset} Stocks:** {', '.join(stock_list)}")
-        else:
-            st.markdown(f"**{asset} Stocks:** No specific suggestions available for this category based on current setup.")
+        if asset in ["Large Cap", "Mid Cap", "Small Cap"]:
+            if stock_list:
+                st.markdown(f"**{asset} Stocks:** {', '.join(stock_list)}")
+            else:
+                st.markdown(f"**{asset} Stocks:** No suggestions currently.")
 
 
 with tab4: # Earnings Calendar Tab (previously tab5)
