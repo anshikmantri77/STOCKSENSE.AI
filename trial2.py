@@ -11,8 +11,8 @@ import warnings
 import random
 import pytz
 
-# --- NEW IMPORTS FOR OPENAI CHATBOT ---
-from langchain_openai import OpenAI # Updated import for OpenAI LLM
+# --- NEW IMPORTS FOR GEMINI CHATBOT ---
+from langchain_google_genai import ChatGoogleGenerativeAI # Updated import for Gemini LLM
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 # --- END NEW IMPORTS ---
@@ -534,26 +534,26 @@ class PortfolioBuilder:
                     suggestions[asset] = random.sample(available_stocks, num_suggestions)
         return suggestions
 
-# --- UPDATED CHATBOT CLASS USING OPENAI AND LANGCHAIN ---
+# --- UPDATED CHATBOT CLASS USING GEMINI AND LANGCHAIN ---
 class Chatbot:
-    """A chatbot integrated with OpenAI's GPT models via LangChain for conversational AI."""
+    """A chatbot integrated with Google's Gemini models via LangChain for conversational AI."""
     def __init__(self):
-        # --- LINE TO PUT YOUR OPENAI API KEY ---
+        # --- LINE TO PUT YOUR GEMINI API KEY ---
         # It's highly recommended to use Streamlit Secrets for production deployment:
         # Create a file named .streamlit/secrets.toml in your project root,
-        # and add: OPENAI_API_KEY = "sk-YOUR_OPENAI_API_KEY_HERE"
-        # Then access it via st.secrets["OPENAI_API_KEY"]
-        openai_api_key = st.secrets.get("OPENAI_API_KEY") # Use .get() to avoid KeyError if not found
+        # and add: GOOGLE_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
+        # Then access it via st.secrets["GOOGLE_API_KEY"]
+        gemini_api_key = st.secrets.get("GOOGLE_API_KEY") # Use .get() to avoid KeyError if not found
 
-        if not openai_api_key:
-            st.error("OpenAI API key not found. Please set it in .streamlit/secrets.toml or as an environment variable.")
+        if not gemini_api_key:
+            st.error("Google Gemini API key not found. Please set it in .streamlit/secrets.toml or as an environment variable.")
             self.conversation = None
             # Optionally st.stop() here if chatbot functionality is critical
         else:
-            # Initialize OpenAI LLM
-            # You can choose different models like "gpt-3.5-turbo-instruct", "gpt-4", etc.
+            # Initialize Gemini LLM
+            # You can choose different models like "gemini-pro"
             # Temperature controls creativity (0.0 for factual, higher for more creative)
-            llm = OpenAI(openai_api_key=openai_api_key, temperature=0.7, model_name="gpt-3.5-turbo-instruct") # or "gpt-4" if you have access
+            llm = ChatGoogleGenerativeAI(google_api_key=gemini_api_key, temperature=0.7, model="gemini-pro")
 
             # Initialize ConversationChain with memory to maintain chat history
             self.conversation = ConversationChain(
@@ -580,7 +580,7 @@ class Chatbot:
                 # Return the error message as a string instead of calling st.error
                 return f"I'm sorry, I encountered an error while processing your request: {e}. Please try again."
         else:
-            return "Chatbot is not initialized. Please ensure the OpenAI API key is set correctly."
+            return "Chatbot is not initialized. Please ensure the Google Gemini API key is set correctly."
 
 # --- END UPDATED CHATBOT CLASS ---
 
@@ -970,8 +970,19 @@ with tab4: # Earnings Calendar Tab
     if alert_company_options:
         alert_company = st.selectbox("Select company for alert:", alert_company_options)
         alert_type = st.radio("Alert me via:", ["Email", "SMS"])
+
+        # NEW: User input for email/phone number
+        user_contact = ""
+        if alert_type == "Email":
+            user_contact = st.text_input("Enter your Email Address:")
+        elif alert_type == "SMS":
+            user_contact = st.text_input("Enter your Phone Number (with country code, e.g., +91XXXXXXXXXX):")
+
         if st.button("Set Alert (Simulated)"):
-            st.success(f"Simulated alert set for {alert_company} via {alert_type}. In a real app, this would use services like Twilio (SMS) or SendGrid (Email) and a backend.")
+            if user_contact:
+                st.success(f"Simulated alert set for {alert_company} via {alert_type} to {user_contact}. In a real app, this would use services like Twilio (SMS) or SendGrid (Email) and a backend.")
+            else:
+                st.warning(f"Please enter your {alert_type.lower()} address/number to set the alert.")
     else:
         st.info("No companies available for setting earnings alerts.")
 
@@ -1130,7 +1141,7 @@ with tab6: # AI-Generated Stock Reports Tab
             st.markdown(report_text)
         else:
             st.error("Could not generate report due to missing data for the selected stock.")
-        st.markdown("*(Note: A full AI-generated report would require integration with a powerful Large Language Model (LLM) like OpenAI's GPT or similar, which would analyze real-time data and generate comprehensive insights.)*")
+        st.markdown("*(Note: A full AI-generated report would require integration with a powerful Large Language Model (LLM) like Google's Gemini or similar, which would analyze real-time data and generate comprehensive insights.)*")
 
 
 # Sidebar Footer with Disclaimer and Creator Info
