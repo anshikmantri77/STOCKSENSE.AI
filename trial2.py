@@ -451,7 +451,7 @@ class StockAnalyzer:
             'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS', 'FINPIPE.NS', 'UJJIVAN.NS',
             'CREDITACC.NS', 'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS', 'FINPIPE.NS',
             'UJJIVAN.NS', 'CREDITACC.NS', 'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS',
-
+        ]
     def get_all_stock_symbols(self):
         """Returns a combined, unique list of all large, mid, and small cap stock symbols."""
         all_symbols = (
