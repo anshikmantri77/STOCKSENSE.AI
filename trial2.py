@@ -301,7 +301,7 @@ def get_nifty50_sample_data_for_screener():
 class StockAnalyzer:
     """Manages categorized lists of Indian stocks (Large, Mid, Small Cap)."""
     def __init__(self):
-        # Extended stock lists with 50 stocks each
+        # Existing Large Cap Stocks (200 stocks)
         self.large_cap_stocks = [
             'RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'ICICIBANK.NS', 'HINDUNILVR.NS',
             'INFY.NS', 'KOTAKBANK.NS', 'SBIN.NS', 'BHARTIARTL.NS', 'ITC.NS',
@@ -348,6 +348,7 @@ class StockAnalyzer:
             'AAVAS.NS', 'HOMEFIRST.NS', 'UJJIVANSFB.NS', 'SPANDANA.NS', 'AROHAN.NS'
         ]
 
+        # Existing Mid Cap Stocks (110 stocks)
         self.mid_cap_stocks = [
             'DMART.NS', 'PIDILITIND.NS', 'BERGEPAINT.NS', 'GODREJCP.NS', 'MARICO.NS',
             'DABUR.NS', 'COLPAL.NS', 'MCDOWELL-N.NS', 'PGHH.NS', 'HAVELLS.NS',
@@ -394,6 +395,7 @@ class StockAnalyzer:
             'DENABANK.NS', 'CORPBANK.NS', 'ANDHRABANK.NS', 'ALLAHABAD.NS', 'ORIENTBANK.NS'
         ]
 
+        # Existing Small Cap Stocks 
         self.small_cap_stocks = [
             'AFFLE.NS', 'ROUTE.NS', 'INDIAMART.NS', 'ZOMATO.NS', 'PAYTM.NS',
             'POLICYBZR.NS', 'FSL.NS', 'CARBORUNIV.NS', 'PGHL.NS', 'VINATIORGA.NS',
@@ -448,8 +450,7 @@ class StockAnalyzer:
             'RAYMOND.NS', 'SIYARAM.NS', 'GRASIM.NS', 'WELSPUN.NS', 'DONEAR.NS',
             'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS', 'FINPIPE.NS', 'UJJIVAN.NS',
             'CREDITACC.NS', 'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS', 'FINPIPE.NS',
-            'UJJIVAN.NS', 'CREDITACC.NS', 'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS'
-        ]
+            'UJJIVAN.NS', 'CREDITACC.NS', 'SPANDANA.NS', 'AROHAN.NS', 'SURYODAY.NS',
 
     def get_all_stock_symbols(self):
         """Returns a combined, unique list of all large, mid, and small cap stock symbols."""
