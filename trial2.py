@@ -11,8 +11,8 @@ import warnings
 import random
 import pytz
 
-# --- NEW IMPORTS FOR GOOGLE GEMINI CHATBOT ---
-from langchain_google_genai import ChatGoogleGenerativeAI # Import for Google Gemini LLM
+# --- NEW IMPORTS FOR GEMINI CHATBOT ---
+from langchain_google_genai import ChatGoogleGenerativeAI # Updated import for Gemini LLM
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 # --- END NEW IMPORTS ---
@@ -47,27 +47,61 @@ st.markdown("""
         padding: 15px;
         margin-bottom: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        color: #333; /* Ensure text is visible in light mode */
+        text-align: center;
     }
-    .dark-mode .metric-card {
-        background: #333; /* Darker background for dark mode */
-        color: #f0f2f6; /* Lighter text for dark mode */
+    .metric-card h3 {
+        color: #1f77b4;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
     }
-    .stButton>button {
-        background-color: #4CAF50;
+    .metric-card p {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    /* --- UPDATED TAB STYLES FOR DARK THEME --- */
+    .stTabs [data-baseweb="tab-list"] button {
+        background-color: #333;
         color: white;
-        padding: 10px 20px;
+        border-radius: 8px 8px 0 0;
+        margin: 0 5px;
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    .stTabs [data-baseweb="tab-list"] button:hover {
+        background-color: #444;
+        color: white;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: black !important; /* Black for selected tab */
+        color: white !important;
+        border: 1px solid #ff7f0e;
+    }
+    /* --- UPDATED BUTTON STYLES FOR DARK THEME --- */
+    .stButton>button {
+        background-color: black; /* Black background for buttons */
+        color: white;
+        border: 1px solid #ff7f0e; /* Orange border for visibility */
         border-radius: 5px;
-        border: none;
-        cursor: pointer;
+        padding: 10px 20px;
+        font-size: 1rem;
+        transition: background-color 0.3s, color 0.3s;
     }
     .stButton>button:hover {
-        background-color: #45a049;
+        background-color: #ff7f0e; /* Orange on hover */
+        color: black; /* Black text on hover for contrast */
+        border: 1px solid black;
+    }
+    .css-1d391kg {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
     .sidebar-footer {
-        font-size: 0.8rem;
         text-align: center;
-        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #555;
     }
     .sidebar-footer a {
         color: #1f77b4;
@@ -76,26 +110,41 @@ st.markdown("""
     .sidebar-footer a:hover {
         text-decoration: underline;
     }
+    h1, h2, h3, h4, h5, h6 {
+        color: #1f77b4;
+    }
+    .stAlert {
+        border-radius: 8px;
+    }
+    .stException {
+        background-color: #ffe0e0;
+        border-left: 5px solid #ff4d4d;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    /* Specific styling for the chatbot in sidebar to make it look distinct */
+    .st-emotion-cache-1pxy10k.e1arcw5v0 { /* Targeting the sidebar wrapper */
+        display: flex;
+        flex-direction: column;
+    }
+    #root > div:nth-child(1) > div.with-sidebar > div > div > div > section.main.st-emotion-cache-nahz7x.e1arcw5v1 > div.block-container.st-emotion-cache-1y4y3u2.ea3g5fm5 > div:nth-child(1) > div > div.st-emotion-cache-c3wz9u.e1arcw5v4 > div > div > div.st-emotion-cache-pkc1r8.e1arcw5v2 {
+        flex-grow: 1; /* Allows main content to fill space */
+    }
+    .st-emotion-cache-1d9w3d1 { /* Targeting sidebar content container for bottom alignment logic */
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .sidebar-top-content {
+        flex-grow: 1; /* Pushes the chatbot and footer to the bottom */
+    }
+    .sidebar-chatbot {
+        margin-top: auto; /* Pushes it to the bottom of the flexible container */
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+    }
 </style>
 """, unsafe_allow_html=True)
-
-# --- Ensure GOOGLE_API_KEY is set ---
-# You should set this as an environment variable, for example:
-# export GOOGLE_API_KEY="YOUR_ACTUAL_GOOGLE_API_KEY"
-# Or you can set it directly in your Streamlit app (less secure for deployment):
-# os.environ["GOOGLE_API_KEY"] = "YOUR_ACTUAL_GOOGLE_API_KEY"
-if "GOOGLE_API_KEY" not in os.environ:
-    st.error("GOOGLE_API_KEY environment variable not set. Please set it to use the AI features.")
-    st.stop() # Stop the app if API key is not set
-
-# Initialize the Google Gemini LLM with a free tier model
-# "gemini-pro" is generally the alias for the latest stable Gemini 1.0 Pro model
-llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0) # You can adjust temperature as needed
-conversation = ConversationChain(
-    llm=llm,
-    memory=ConversationBufferMemory()
-)
-
 
 # Main Header
 st.markdown("<h1 class='main-header'>StockSense AI 📈</h1>", unsafe_allow_html=True)
