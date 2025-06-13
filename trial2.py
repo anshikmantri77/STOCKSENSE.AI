@@ -553,7 +553,7 @@ class Chatbot:
             # Initialize Gemini LLM
             # Using "models/gemini-pro" which is the more explicit and robust way to call the model
             # Temperature controls creativity (0.0 for factual, higher for more creative)
-            llm = ChatGoogleGenerativeAI(google_api_key=gemini_api_key, temperature=0.7, model="models/gemini-pro")
+            llm = ChatGoogleGenerativeAI(google_api_key=gemini_api_key, temperature=0.7, model="gemini-2.5-pro-preview")
 
             # Initialize ConversationChain with memory to maintain chat history
             self.conversation = ConversationChain(
