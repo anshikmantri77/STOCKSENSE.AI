@@ -6,6 +6,5 @@ altair>=5.3.0
 plotly>=5.20.0
 textblob>=0.18.0.0
 langchain
-langchain-google-genai
-google-generativeai 
-pytz 
+huggingface_hub
+pytz
