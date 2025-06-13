@@ -822,41 +822,45 @@ with tab2: # Stock Screener Tab
         with col_s1:
             # Safely determine min/max for sliders, handling potential empty data or NaNs
             # P/E Ratio
-            pe_max_val = float(screener_df['P/E Ratio'].max()) if not screener_df['P/E Ratio'].empty else 100.0 # Default max
-            # CHANGED: min_value is now always 0.0
-            pe_min = st.slider("Min P/E Ratio", 0.0, pe_max_val + 0.1, 0.0, 0.1) # Default start value for slider is also 0.0
+            pe_min_val_for_slider = 0.0 # Slider starts from 0 for P/E
+            pe_max_val_for_data = float(screener_df['P/E Ratio'].max()) if not screener_df['P/E Ratio'].empty else 100.0 # Max from data or default
+            # CHANGED: Label to "Max P/E Ratio" and default value to a higher number
+            pe_max = st.slider("Max P/E Ratio", pe_min_val_for_slider, pe_max_val_for_data + 0.1, pe_max_val_for_data, 0.1)
 
             # ROE (%)
-            roe_max_val = float(screener_df['ROE (%)'].max()) if not screener_df['ROE (%)'].empty else 50.0 # Default max
-            # CHANGED: min_value is now always 0.0
-            roe_min = st.slider("Min ROE (%)", 0.0, roe_max_val + 0.1, 15.0)
+            roe_min_val_for_slider = 0.0
+            roe_max_val_for_data = float(screener_df['ROE (%)'].max()) if not screener_df['ROE (%)'].empty else 50.0
+            roe_min = st.slider("Min ROE (%)", roe_min_val_for_slider, roe_max_val_for_data + 0.1, 15.0)
 
             # Debt/Equity
-            debt_equity_max_val = float(screener_df['Debt/Equity'].max()) if not screener_df['Debt/Equity'].empty else 5.0
-            # CHANGED: min_value is now always 0.0
-            debt_equity_max = st.slider("Max Debt/Equity", 0.0, debt_equity_max_val + 0.1, 1.0)
+            debt_equity_min_val_for_slider = 0.0
+            debt_equity_max_val_for_data = float(screener_df['Debt/Equity'].max()) if not screener_df['Debt/Equity'].empty else 5.0
+            debt_equity_max = st.slider("Max Debt/Equity", debt_equity_min_val_for_slider, debt_equity_max_val_for_data + 0.1, 1.0)
         with col_s2:
             # Market Cap (Cr)
-            market_cap_max_val = float(screener_df['Market Cap (Cr)'].max()) if not screener_df['Market Cap (Cr)'].empty else 500000.0 # Default max
-            # CHANGED: min_value is now always 0.0
-            market_cap_min = st.slider("Min Market Cap (Cr)", 0.0, market_cap_max_val + 0.1, 100000.0)
+            market_cap_min_val_for_slider = 0.0 # Slider starts from 0 for Market Cap
+            market_cap_max_val_for_data = float(screener_df['Market Cap (Cr)'].max()) if not screener_df['Market Cap (Cr)'].empty else 500000.0 # Max from data or default
+            # CHANGED: Label to "Max Market Cap (Cr)" and default value to a higher number
+            market_cap_max = st.slider("Max Market Cap (Cr)", market_cap_min_val_for_slider, market_cap_max_val_for_data + 0.1, market_cap_max_val_for_data)
 
             # YoY Revenue Growth (%)
-            yoy_rev_max_val = float(screener_df['YoY Revenue Growth (%)'].max()) if not screener_df['YoY Revenue Growth (%)'].empty else 50.0
-            # CHANGED: min_value is now always 0.0
-            yoy_revenue_growth_min = st.slider("Min YoY Revenue Growth (%)", 0.0, yoy_rev_max_val + 0.1, 10.0)
+            yoy_rev_min_val_for_slider = 0.0
+            yoy_rev_max_val_for_data = float(screener_df['YoY Revenue Growth (%)'].max()) if not screener_df['YoY Revenue Growth (%)'].empty else 50.0
+            yoy_revenue_growth_min = st.slider("Min YoY Revenue Growth (%)", yoy_rev_min_val_for_slider, yoy_rev_max_val_for_data + 0.1, 10.0)
 
             # YoY PAT Growth (%)
-            yoy_pat_max_val = float(screener_df['YoY PAT Growth (%)'].max()) if not screener_df['YoY PAT Growth (%)'].empty else 50.0
-            # CHANGED: min_value is now always 0.0
-            yoy_pat_growth_min = st.slider("Min YoY PAT Growth (%)", 0.0, yoy_pat_max_val + 0.1, 15.0)
+            yoy_pat_min_val_for_slider = 0.0
+            yoy_pat_max_val_for_data = float(screener_df['YoY PAT Growth (%)'].max()) if not screener_df['YoY PAT Growth (%)'].empty else 50.0
+            yoy_pat_growth_min = st.slider("Min YoY PAT Growth (%)", yoy_pat_min_val_for_slider, yoy_pat_max_val_for_data + 0.1, 15.0)
 
 
         filtered_df = screener_df[
-            (screener_df['P/E Ratio'] >= pe_min) &
+            # CHANGED: P/E Ratio filter from >= to <=
+            (screener_df['P/E Ratio'] <= pe_max) &
             (screener_df['ROE (%)'] >= roe_min) &
             (screener_df['Debt/Equity'] <= debt_equity_max) &
-            (screener_df['Market Cap (Cr)'] >= market_cap_min) &
+            # CHANGED: Market Cap filter from >= to <=
+            (screener_df['Market Cap (Cr)'] <= market_cap_max) &
             (screener_df['YoY Revenue Growth (%)'] >= yoy_revenue_growth_min) &
             (screener_df['YoY PAT Growth (%)'] >= yoy_pat_growth_min)
         ]
@@ -868,7 +872,6 @@ with tab2: # Stock Screener Tab
             st.info("No stocks match your criteria. Try adjusting the filters.")
     else:
         st.warning("Could not load Nifty 50 sample data for the screener. Please try again later.")
-
 with tab3: # AI Portfolio Builder Tab
     st.header("💰 AI Portfolio Builder")
     st.markdown("---")
