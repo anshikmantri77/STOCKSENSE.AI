@@ -622,23 +622,24 @@ for message in st.session_state.chat_history:
 # Accept user input
 user_query_sidebar = st.sidebar.chat_input("Type your question here...", key="chat_input_sidebar")
 
-# --- CORRECTED CHATBOT INTERACTION LOGIC ---
+# --- ****FULLY CORRECTED CHATBOT INTERACTION LOGIC**** ---
 if user_query_sidebar:
-    # Add user message to chat history
+    # Add user message to chat history and display it
     st.session_state.chat_history.append({"role": "user", "content": user_query_sidebar})
-    # Display user message in chat message container
     with st.sidebar.chat_message("user"):
         st.sidebar.markdown(user_query_sidebar)
 
-    # Display assistant response in chat message container
+    # Display assistant response
     with st.sidebar.chat_message("assistant"):
-        # The spinner will be displayed inside the assistant's chat bubble while waiting
+        # The spinner should ONLY wrap the long-running function call
         with st.sidebar.spinner("Thinking..."):
-            # The get_response call is now safe
             response_sidebar = st.session_state.chatbot_instance.get_response(user_query_sidebar)
-            st.sidebar.markdown(response_sidebar)
-            # Add assistant response to chat history
-            st.session_state.chat_history.append({"role": "assistant", "content": response_sidebar})
+        
+        # Display the response AFTER the spinner is done
+        st.sidebar.markdown(response_sidebar)
+
+    # Add the assistant's response to history AFTER it has been generated and displayed
+    st.session_state.chat_history.append({"role": "assistant", "content": response_sidebar})
 
 st.sidebar.markdown("</div>", unsafe_allow_html=True)
 st.sidebar.markdown("---") # Separator before footer
