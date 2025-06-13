@@ -272,7 +272,7 @@ def get_nifty50_sample_data_for_screener():
             try:
                 # Get company name from info, or use symbol if not available
                 company_name = info.get('shortName', info.get('longName', symbol.replace(".NS", "")))
-                
+
                 pe_ratio = info.get('trailingPE', np.nan)
                 roe = random.uniform(10, 30) # Simulated ROE
                 debt_equity = random.uniform(0.1, 1.5) # Simulated Debt/Equity
@@ -347,7 +347,7 @@ class StockAnalyzer:
             'SUNTV.NS', 'BALRAMCHIN.NS', 'DHANUKA.NS', 'RALLIS.NS', 'GHCL.NS',
             'AAVAS.NS', 'HOMEFIRST.NS', 'UJJIVANSFB.NS', 'SPANDANA.NS', 'AROHAN.NS'
         ]
-        
+
         self.mid_cap_stocks = [
             'DMART.NS', 'PIDILITIND.NS', 'BERGEPAINT.NS', 'GODREJCP.NS', 'MARICO.NS',
             'DABUR.NS', 'COLPAL.NS', 'MCDOWELL-N.NS', 'PGHH.NS', 'HAVELLS.NS',
@@ -393,7 +393,7 @@ class StockAnalyzer:
             'KIMS.NS', 'RAINBOW.NS', 'GLOBALHLT.NS', 'VIJAYABANK.NS', 'SYNDIBANK.NS',
             'DENABANK.NS', 'CORPBANK.NS', 'ANDHRABANK.NS', 'ALLAHABAD.NS', 'ORIENTBANK.NS'
         ]
-        
+
         self.small_cap_stocks = [
             'AFFLE.NS', 'ROUTE.NS', 'INDIAMART.NS', 'ZOMATO.NS', 'PAYTM.NS',
             'POLICYBZR.NS', 'FSL.NS', 'CARBORUNIV.NS', 'PGHL.NS', 'VINATIORGA.NS',
@@ -547,7 +547,7 @@ class Chatbot:
 
         if not openai_api_key:
             st.error("OpenAI API key not found. Please set it in .streamlit/secrets.toml or as an environment variable.")
-            self.conversation = None 
+            self.conversation = None
             # Optionally st.stop() here if chatbot functionality is critical
         else:
             # Initialize OpenAI LLM
@@ -562,7 +562,7 @@ class Chatbot:
             )
             # Initialize chat history in session state if not already present
             if "chat_history" not in st.session_state:
-                st.session_state.chat_history = [] 
+                st.session_state.chat_history = []
 
     # --- CORRECTED get_response METHOD ---
     def get_response(self, query):
@@ -590,7 +590,7 @@ st.sidebar.header("Select a Stock")
 
 # Use the combined list from StockAnalyzer for the primary selectbox
 selected_stock_symbol_from_list = st.sidebar.selectbox(
-    "Choose a stock from our curated list:", 
+    "Choose a stock from our curated list:",
     all_stock_symbols,
     index=all_stock_symbols.index("RELIANCE.NS") if "RELIANCE.NS" in all_stock_symbols else 0 # Default to Reliance or first stock
 )
@@ -622,27 +622,33 @@ for message in st.session_state.chat_history:
 # Accept user input
 user_query_sidebar = st.sidebar.chat_input("Type your question here...", key="chat_input_sidebar")
 
-# --- ****FULLY CORRECTED CHATBOT INTERACTION LOGIC**** ---
+# --- ****NEW ROBUST CHATBOT LOGIC USING ST.EMPTY()**** ---
 if user_query_sidebar:
     # Add user message to chat history and display it
     st.session_state.chat_history.append({"role": "user", "content": user_query_sidebar})
     with st.sidebar.chat_message("user"):
         st.sidebar.markdown(user_query_sidebar)
 
-    # Display assistant response
+    # Display assistant response using the st.empty() pattern
     with st.sidebar.chat_message("assistant"):
-        # The spinner should ONLY wrap the long-running function call
-        with st.sidebar.spinner("Thinking..."):
-            response_sidebar = st.session_state.chatbot_instance.get_response(user_query_sidebar)
-        
-        # Display the response AFTER the spinner is done
-        st.sidebar.markdown(response_sidebar)
+        # 1. Create a placeholder
+        placeholder = st.empty()
+        # 2. Show a thinking message in the placeholder
+        placeholder.markdown("🤔 Thinking...")
 
-    # Add the assistant's response to history AFTER it has been generated and displayed
+        # 3. Get the response from the chatbot
+        response_sidebar = st.session_state.chatbot_instance.get_response(user_query_sidebar)
+
+        # 4. Overwrite the placeholder with the actual response
+        placeholder.markdown(response_sidebar)
+
+    # 5. Add the actual response to the chat history
     st.session_state.chat_history.append({"role": "assistant", "content": response_sidebar})
+
 
 st.sidebar.markdown("</div>", unsafe_allow_html=True)
 st.sidebar.markdown("---") # Separator before footer
+
 
 # --- Tabs for different features ---
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
@@ -904,10 +910,10 @@ with tab3: # AI Portfolio Builder Tab
         st.markdown(f"""
             <details>
             <summary>Assumptions for Projection</summary>
-            _This projection uses **simulated average annual returns** based on your risk profile 
-            (e.g., Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap']*100:.1f}%, 
-            Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap']*100:.1f}%, 
-            Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%, 
+            _This projection uses **simulated average annual returns** based on your risk profile
+            (e.g., Large Cap: {portfolio_builder_instance.average_annual_returns['Large Cap']*100:.1f}%,
+            Mid Cap: {portfolio_builder_instance.average_annual_returns['Mid Cap']*100:.1f}%,
+            Small Cap: {portfolio_builder_instance.average_annual_returns['Small Cap']*100:.1f}%,
             Debt: {portfolio_builder_instance.average_annual_returns['Debt']*100:.1f}%,
             Gold: {portfolio_builder_instance.average_annual_returns['Gold']*100:.1f}%)._
             _It's a simplified calculation and does not account for market volatility, inflation, taxes, fees, or actual historical performance of specific investments.
@@ -926,7 +932,7 @@ with tab3: # AI Portfolio Builder Tab
             st.markdown(f"**{asset} Stocks:** No specific suggestions available for this category based on current setup.")
 
 
-with tab4: # Earnings Calendar Tab (previously tab5)
+with tab4: # Earnings Calendar Tab
     st.header("🗓️ Earnings Calendar & Alerts")
     st.markdown("---")
 
@@ -937,13 +943,16 @@ with tab4: # Earnings Calendar Tab (previously tab5)
     today = datetime.now().date()
     # Use a small random sample of stocks from the analyzer for the calendar
     sample_symbols_for_earnings = random.sample(all_stock_symbols, min(10, len(all_stock_symbols)))
-    
+
     earnings_data = []
     for symbol in sample_symbols_for_earnings:
-        # Attempt to get a short name for display
+        # FIXED: Handle cases where get_current_stock_info returns None
         info = get_current_stock_info(symbol)
-        company_name = info.get('shortName', info.get('longName', symbol.replace(".NS", "")))
-        
+        if info:
+            company_name = info.get('shortName', info.get('longName', symbol.replace(".NS", "")))
+        else:
+            company_name = symbol.replace(".NS", "") # Fallback to symbol
+
         earnings_data.append({
             "Company": company_name,
             "Symbol": symbol,
@@ -967,7 +976,7 @@ with tab4: # Earnings Calendar Tab (previously tab5)
         st.info("No companies available for setting earnings alerts.")
 
 
-with tab5: # Stock Comparison Tab (previously tab6)
+with tab5: # Stock Comparison Tab
     st.header("⚖️ Stock Comparison Tool")
     st.markdown("---")
 
@@ -975,7 +984,7 @@ with tab5: # Stock Comparison Tab (previously tab6)
 
     # Use all available symbols from StockAnalyzer for comparison selection
     comparison_options = all_stock_symbols
-    
+
     # Set default values to common large caps if available, otherwise first few in the list
     default_indices = []
     default_symbols_to_try = ["RELIANCE.NS", "TCS.NS", "HDFCBANK.NS"]
@@ -1005,6 +1014,7 @@ with tab5: # Stock Comparison Tab (previously tab6)
 
     for stock_sym in comparison_symbols:
         info = get_current_stock_info(stock_sym)
+        # FIXED: Handle cases where get_current_stock_info returns None
         if info:
             # Get display name for the comparison table
             display_name = info.get('shortName', info.get('longName', stock_sym))
@@ -1021,6 +1031,13 @@ with tab5: # Stock Comparison Tab (previously tab6)
                     val = f"{val:,.2f}"
                 row_data[metric.replace('regularMarketPrice', 'Price').replace('trailingPE', 'P/E Ratio').replace('marketCap', 'Market Cap').replace('dividendYield', 'Dividend Yield').replace('fiftyTwoWeekHigh', '52W High').replace('fiftyTwoWeekLow', '52W Low').replace('sector', 'Sector').replace('industry', 'Industry')] = val
             comparison_data.append(row_data)
+        else:
+            # Create a row with N/A values if info is None
+            row_data = {"Symbol": stock_sym.replace(".NS", "")}
+            for metric in metrics_to_compare:
+                row_data[metric.replace('regularMarketPrice', 'Price').replace('trailingPE', 'P/E Ratio').replace('marketCap', 'Market Cap').replace('dividendYield', 'Dividend Yield').replace('fiftyTwoWeekHigh', '52W High').replace('fiftyTwoWeekLow', '52W Low').replace('sector', 'Sector').replace('industry', 'Industry')] = 'N/A'
+            comparison_data.append(row_data)
+
 
     if comparison_data:
         comp_df = pd.DataFrame(comparison_data)
@@ -1030,7 +1047,7 @@ with tab5: # Stock Comparison Tab (previously tab6)
     else:
         st.info("Select stocks above to see their comparison.")
 
-with tab6: # AI-Generated Stock Reports Tab (previously tab7)
+with tab6: # AI-Generated Stock Reports Tab
     st.header("📝 AI-Generated Stock Reports")
     st.markdown("---")
 
@@ -1042,10 +1059,14 @@ with tab6: # AI-Generated Stock Reports Tab (previously tab7)
     # Get the display name for the button
     report_display_name = report_stock_symbol
     temp_info_report = get_current_stock_info(report_stock_symbol)
-    if temp_info_report and temp_info_report.get('shortName'):
-        report_display_name = temp_info_report['shortName']
-    elif temp_info_report and temp_info_report.get('longName'):
-        report_display_name = temp_info_report['longName']
+    if temp_info_report:
+        if temp_info_report.get('shortName'):
+            report_display_name = temp_info_report['shortName']
+        elif temp_info_report.get('longName'):
+            report_display_name = temp_info_report['longName']
+    else:
+        report_display_name = report_stock_symbol.replace(".NS","")
+
 
     if st.button(f"Generate Report for {report_display_name} (Simulated)"):
         st.subheader(f"AI Report for {report_display_name} ({report_stock_symbol})")
@@ -1086,7 +1107,7 @@ with tab6: # AI-Generated Stock Reports Tab (previously tab7)
                     report_text += "The company shows strong simulated year-on-year PAT growth, indicating healthy profitability expansion. "
                 if isinstance(dii_holding_val, str) and float(dii_holding_val) > 10 or (isinstance(fii_holding_val, str) and float(fii_holding_val) > 20):
                     report_text += "Significant institutional holding (DII/FII) suggests confidence from major investors.\n\n"
-            except ValueError:
+            except (ValueError, TypeError):
                 report_text += "Growth and holding percentages could not be parsed for detailed analysis. "
 
 
@@ -1122,7 +1143,7 @@ st.sidebar.markdown(
         <p><b>Made by:</b> ANSHIK MANTRI</p>
         <p><b>Email:</b> <a href="mailto:anshikmantri26@gmail.com">anshikmantri26@gmail.com</a></p>
         <p>
-            <a href="http://www.linkedin.com/in/anshikmantri" target="_blank">LinkedIn</a> | 
+            <a href="http://www.linkedin.com/in/anshikmantri" target="_blank">LinkedIn</a> |
             <a href="http://www.instagram.com/anshik.m6777/" target="_blank">Instagram</a>
         </p>
     </div>
