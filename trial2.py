@@ -644,32 +644,10 @@ st.sidebar.markdown("</div>", unsafe_allow_html=True)
 st.sidebar.markdown("---") # Separator before footer
 
 # --- Tabs for different features ---
-st.markdown(
-    """
-    <style>
-    /* Tab header container */
-    div[data-baseweb="tab-list"] {
-        background-color: black;
-        border-radius: 8px;
-    }
-
-    /* Individual tab buttons */
-    button[data-baseweb="tab"] {
-        color: white !important;
-        background-color: black !important;
-        border-radius: 0px;
-    }
-
-    /* Active tab style */
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #00FFAA !important;
-        font-weight: bold;
-        border-bottom: 3px solid #00FFAA;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "📊 Dashboard", "🔍 Stock Screener", "💰 AI Portfolio Builder",
+    "🗓️ Earnings Calendar", "⚖️ Stock Comparison", "📝 AI Reports"
+])
 
 
 with tab1: # Dashboard Tab
