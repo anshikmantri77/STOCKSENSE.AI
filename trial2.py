@@ -799,7 +799,7 @@ with tab2: # Stock Screener Tab
             pe_min_val_for_slider = 0.0 # Slider starts from 0 for P/E
             pe_max_val_for_data =  pe_max_val_for_data = float(screener_df['P/E Ratio'].max()) if not screener_df['P/E Ratio'].empty else 150.0 # Max from data or default
             # CHANGED: Label to "Max P/E Ratio" and default value to a higher number
-            pe_max = st.slider("Max P/E Ratio", pe_min_val_for_slider, pe_max_val_for_data + 0.1, pe_max_val_for_data, 0.1)
+            pe_max = st.slider("Max P/E Ratio", 0.0, 300.0, 150.0, 0.1) # Or any other fixed max value you prefer, like 200.0 or 500.0
 
             # ROE (%)
             roe_min_val_for_slider = 0.0
