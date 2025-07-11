@@ -106,10 +106,5 @@ This app uses:
 
 ---
 
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
 
 > ⚠️ **Disclaimer:** StockSense AI is a simulated app built for education and learning. It does not offer financial advice or trading recommendations. Always consult a certified financial advisor.
