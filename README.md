@@ -22,7 +22,7 @@ Built for individual investors, financial analysts, and learners exploring stock
 ## 🌐 Live Demo
 
 🚀 Check out the deployed application here:  
-👉 **[StockSense AI Live App](https://anshik-stocksenseai.streamlit.app/)**
+👉 **[StockSense AI Live App](https://anshikmantri-stocksense-ai.streamlit.app/)**
 
 ---
 
