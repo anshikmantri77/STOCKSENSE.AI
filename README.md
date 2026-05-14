@@ -1,20 +1,21 @@
 # 📈 StockSense AI – Smart Stock Market Intelligence Dashboard
 
-**StockSense AI** is a powerful Streamlit-based web application that provides real-time stock analysis, personalized portfolio building, simulated AI-generated reports, and interactive financial dashboards — all in one place.
+**StockSense AI** is a powerful Streamlit-based web application that provides real-time stock analysis, FinBERT-powered sentiment analysis, portfolio building, AI-generated reports, and interactive financial dashboards.
 
-This tool is ideal for individual investors, financial analysts, or learners looking to explore stock market data and AI integration.
+Built for individual investors, financial analysts, and learners exploring stock market data and AI integration.
 
 ---
 
-## 🚀 Features at a Glance
+## 🚀 Features
 
-- 📊 **Stock Dashboard** – View price trends, key metrics, candlestick charts  
-- 🧠 **AI Assistant (Gemini LLM)** – Ask anything about finance or stocks  
-- 🔍 **Custom Screener** – Filter stocks by P/E, ROE, Debt/Equity, Growth, etc.  
-- 💰 **Portfolio Builder** – Build simulated portfolios based on risk profile  
-- 🗓️ **Earnings Calendar** – See upcoming earnings (simulated) + set alerts  
-- ⚖️ **Stock Comparison** – Compare up to 3 stocks side-by-side  
-- 📝 **AI Reports** – Generate simulated summary reports for stocks  
+- 📊 **Stock Dashboard** – Real-time price data, key financial metrics, candlestick charts, and market overview
+- 🧠 **AI Assistant (Gemini LLM)** – Ask anything about finance or stocks via sidebar chatbot
+- 🔍 **Custom Screener** – Filter stocks by P/E, ROE, Debt/Equity, growth rates, and market cap (real data)
+- 💰 **Portfolio Builder** – Build portfolios based on risk profile with investment projections
+- 🗓️ **Earnings Calendar** – Real earnings dates via yfinance
+- ⚖️ **Stock Comparison** – Compare up to 3 stocks side-by-side with correlation + beta
+- 📝 **AI Reports** – Generate summary reports using real financial data + sentiment
+- 🏷️ **FinBERT Sentiment** – Real NLP sentiment classification on live news headlines
 
 ---
 
@@ -27,14 +28,16 @@ This tool is ideal for individual investors, financial analysts, or learners loo
 
 ## 🛠️ Tech Stack
 
-| Component         | Technology                     |
-|------------------|--------------------------------|
-| Frontend         | Streamlit                      |
-| Data Sources     | Yahoo Finance (via `yfinance`) |
-| Charts           | Plotly, Altair                 |
-| AI Assistant     | LangChain + Gemini LLM         |
-| Sentiment Engine | TextBlob                       |
-| Language         | Python 3.8+                    |
+| Component             | Technology                            |
+|-----------------------|---------------------------------------|
+| Frontend              | Streamlit                             |
+| Data Sources          | Yahoo Finance (via `yfinance`)        |
+| Charts                | Plotly                                |
+| AI Assistant          | LangChain + Gemini LLM                |
+| Sentiment Engine      | FinBERT (ProsusAI) via HuggingFace    |
+| Caching               | `st.cache_data` TTL-based             |
+| Language              | Python 3.11+                          |
+| Containerization      | Docker                                |
 
 ---
 
@@ -57,43 +60,71 @@ Create a file called `.streamlit/secrets.toml`:
 GOOGLE_API_KEY = "your_gemini_api_key_here"
 ```
 
-Alternatively, set an environment variable:
+Alternatively, copy the env example and set the environment variable:
 ```bash
+cp .env.example .env
 export GOOGLE_API_KEY="your_gemini_api_key_here"
 ```
 
 ### 4. Run the App
 ```bash
-streamlit run trial2.py
+streamlit run stocksense/main.py
 ```
 
 ---
 
 ## 🧠 AI Capabilities
 
-- Built-in chatbot (Gemini) answers finance & market queries  
-- Generates basic summary reports based on simulated financials  
-- Maintains chat history across sessions using Streamlit session state  
+- Built-in chatbot (Gemini) answers finance & market queries
+- FinBERT transformer model for real-time news sentiment classification
+- Generates comprehensive reports based on real financial data
 
 ---
 
-## 📋 Simulated Data Notice
+## 📋 Data Sources
 
-This app uses:
-- Simulated news & financial metrics  
-- Simulated earnings calendar  
-- Randomized values for demo portfolio projections  
-
-🔔 *It is for **educational/demo purposes only. Not for trading or investment advice.*
+This app uses **real data** from Yahoo Finance via the `yfinance` library:
+- Real-time and historical stock prices
+- Actual financial metrics (P/E, ROE, Market Cap, etc.)
+- Live news headlines with FinBERT sentiment analysis
+- Real earnings calendar data
 
 ---
 
-## 🧩 Future Additions
+## 🧩 Project Structure
 
-- ✅ Real earnings calendar integration  
-- ✅ Live alerts via email or SMS (Twilio/SendGrid)  
-- ✅ Full AI reports using real-time data  
-- ✅ Deploy on Streamlit Cloud or Hugging Face Spaces  
+```
+stocksense/
+├── main.py                  # Streamlit entry point
+├── config.py                # Constants, stock lists, settings
+├── modules/
+│   ├── stock_data.py        # yfinance fetching + caching
+│   ├── sentiment.py         # FinBERT sentiment pipeline
+│   ├── ai_agent.py          # LangChain chatbot
+│   ├── portfolio.py         # Portfolio builder logic
+│   ├── screener.py          # Stock screener filters
+│   └── charts.py            # Plotly chart functions
+├── utils/
+│   ├── helpers.py           # Formatting utilities
+├── tests/                   # Test files
+├── .streamlit/
+│   └── secrets.toml
+├── .env.example
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 🐳 Docker Deployment
+
+```bash
+docker-compose up --build
+```
+
+The app will be available at `http://localhost:8501`.
 
 ---
 
@@ -101,10 +132,8 @@ This app uses:
 
 **Anshik Mantri**  
 📧 [anshikmantri26@gmail.com](mailto:anshikmantri26@gmail.com)  
-🔗 [LinkedIn](https://www.linkedin.com/in/anshikmantri)  
-📷 [Instagram](https://www.instagram.com/anshik.m6777/)
+🔗 [LinkedIn](https://www.linkedin.com/in/anshikmantri)
 
 ---
 
-
-> ⚠️ **Disclaimer:** StockSense AI is a simulated app built for education and learning. It does not offer financial advice or trading recommendations. Always consult a certified financial advisor.
+> ⚠️ **Disclaimer:** StockSense AI is built for education and learning. It does not offer financial advice or trading recommendations. Always consult a certified financial advisor.

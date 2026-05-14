@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  stocksense:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./.streamlit:/app/.streamlit
+    restart: unless-stopped

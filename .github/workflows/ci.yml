@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pyflakes
+
+      - name: Check syntax with pyflakes
+        run: |
+          pyflakes stocksense/
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Smoke test
+        run: |
+          python -c "import ast; ast.parse(open('stocksense/main.py').read()); print('main.py: syntax OK')"
+          python -c "
+import sys
+sys.path.insert(0, 'stocksense')
+from config import stock_analyzer, all_stock_symbols
+from modules.stock_data import get_stock_data
+from modules.charts import candlestick_chart
+from modules.portfolio import PortfolioBuilder
+from utils.helpers import export_portfolio_csv
+print('All imports OK')
+"
